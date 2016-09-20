@@ -1,0 +1,119 @@
+﻿
+@{
+    ViewBag.Title = "Index";
+    Layout = "~/Views/Shared/_LayoutMain.cshtml";
+}
+
+
+<div class="block-center mt-xl wd-xl">
+    <!-- START panel-->
+    <div class="panel panel-dark panel-flat">
+        <div class="panel-heading text-center">
+            @*<a href="#">
+                <img src="/Content/Images/logo.png" alt="Image" class="block-center img-rounded" />
+            </a>*@
+        </div>
+        <div class="panel-body">
+            <h3 class="text-center pv">PASSWORD RESET</h3>
+            <form role="form" id="passwordResetForm">
+                <p class="text-center">Fill out your email below to receive instructions on how to reset your password.</p>
+                <div class="form-group has-feedback">
+                    <label for="resetInputEmail">Email address</label>
+                    <input id="resetInputEmail" name="resetInputEmail" type="email" placeholder="Enter email" autocomplete="off" class="form-control"/>
+                    <span class="fa fa-envelope form-control-feedback text-muted"></span>
+                </div>
+                <button type="submit" id="resetSubmit" class="btn btn-danger btn-block">Reset</button>
+            </form>
+        </div>
+    </div>
+    <!-- END panel-->
+</div>
+
+
+
+@section Scripts
+{
+<script src="https://ajax.aspnetcdn.com/ajax/jquery.validate/1.15.0/jquery.validate.js"></script>
+<script src="~/Scripts/sabio.services.reset.js"></script>
+
+
+<link rel="stylesheet" href="http://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/css/toastr.min.css" />
+<script src="http://cdnjs.cloudflare.com/ajax/libs/toastr.js/2.0.2/js/toastr.min.js"></script>
+
+<script type="text/javascript">
+
+
+    sabio.page.startUp = function () {
+
+        $('#resetSubmit').on('click', sabio.page.handlers.resetOnFire);
+        sabio.page.initializeValidation();
+    };
+
+
+    sabio.page.handlers.resetOnFire = function (evt) {
+
+        evt.preventDefault();
+
+        if ($('#passwordResetForm').valid())
+        {
+            var userEmailData = {};
+
+            userEmailData.Email = $('#resetInputEmail').val();
+
+            sabio.services.reset.insert(userEmailData, sabio.page.handlers.ajaxSuccess, sabio.page.handlers.ajaxFailure);
+        }
+        else
+        {
+        
+        }
+
+        $('#passwordResetForm').trigger('reset');
+    };
+
+
+    sabio.page.initializeValidation = function () {
+
+        jQuery.validator.setDefaults({
+
+            debug: true
+        });
+
+        $('#passwordResetForm').validate({
+            rules: {
+                'resetInputEmail': {
+                    required: true,
+                    email: true
+                }
+            },
+            messages: {
+                'resetInputEmail': {
+                    required: 'Email is required.',
+                    email: 'Enter a correct email address.'
+                }
+            }
+        });
+    };
+
+
+    sabio.page.handlers.ajaxSuccess = function (output) {
+
+        console.log('ajax success');
+        toastr.options = {
+            "positionClass": "toast-top-right"
+        };
+        toastr.success('Email confirmed. Ink rocks!!')
+    };
+
+
+    sabio.page.handlers.ajaxFailure = function () {
+
+        console.log('ajax fail');
+        toastr.options = {
+            "positionClass": "toast-top-left"
+        };
+        toastr.error('The email you provided is not in our database.')
+    };
+
+
+</script>
+}

@@ -1,0 +1,135 @@
+﻿@model Sabio.Web.Models.ViewModels.ItemViewModel<Guid>
+@{
+    ViewBag.Title = "Reset";
+    Layout = "~/Views/Shared/_LayoutMain.cshtml";
+}
+
+
+<div class="block-center mt-xl wd-xl">
+    <div class="panel panel-dark panel-flat">
+        <div class="panel-body">
+            <h3 class="text-center pv">Reset Your Password Below</h3><br/>
+            <form role="form" id="reset-form" novalidate>
+                <div class="password-field">
+                    <div class="form-group has-feedback">
+                        <label for="new-password" class="text-muted">New Password</label>
+                        <input name="new-password" id="new-password" type="Password" autocomplete="off" required="required" class="form-control" />
+                        <span class="fa fa-lock form-control-feedback text-muted"></span>
+                    </div>
+                    <div class="form-group has-feedback">
+                        <label for="verify-new-password" class="text-muted">Verify New Password</label>
+                        <input name="verify-new-password" id="verify-new-password" type="password" autocomplete="off" required="required" data-parsley-equalto="#password" class="form-control" />
+                        <span class="fa fa-lock form-control-feedback text-muted"></span>
+                    </div>
+                </div>
+                <button type="submit" id="reset-confirm" class="btn btn-danger btn-block">Confirm</button>
+            </form>
+        </div>
+    </div>
+</div>
+
+
+<div class="container">
+    <input type="hidden" id="userToken" value="@Model.Item" />
+</div>
+
+
+
+
+
+
+
+@section Scripts
+{
+<script src="https://ajax.aspnetcdn.com/ajax/jquery.validate/1.15.0/jquery.validate.js"></script>
+<script src="~/Scripts/sabio.services.reset.js"></script>
+
+<link rel="stylesheet" href="http://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/css/toastr.min.css" />
+<script src="http://cdnjs.cloudflare.com/ajax/libs/toastr.js/2.0.2/js/toastr.min.js"></script>
+
+    <script type="text/javascript">
+
+
+        sabio.page.startUp = function () {
+
+            $("#reset-confirm").on('click', sabio.page.handlers.resetconfirmation);
+            sabio.page.initializeValidation();
+        };
+
+
+        sabio.page.handlers.resetconfirmation = function (evt) {
+
+            evt.preventDefault();
+            
+            if ($('#reset-form').valid()) {
+
+                var userNewPassword = {};
+                userNewPassword.Password = $('#new-password').val();
+                userNewPassword.Verify = $('#verify-new-password').val();
+                userNewPassword.TokenString = $('#userToken').val();
+
+                sabio.services.reset.update(userNewPassword, sabio.page.handlers.ajaxSuccess, sabio.page.handlers.ajaxFailure);
+            }
+            else
+            {
+            }
+
+            $('#reset-form').trigger('reset');
+        };
+
+
+        sabio.page.initializeValidation = function () {
+
+            jQuery.validator.setDefaults({
+
+                debug: true
+            });
+
+            $('#reset-form').validate({
+                rules: {
+                    'new-password': {
+                        required: true,
+                        minlength: 8
+                    },
+                    'verify-new-password': {
+                        required: true,
+                        minlength: 8,
+                        equalTo: '#new-password'
+                    }
+                },
+                messages: {
+                    'new-password': {
+                        required: 'Password is required.',
+                        minlength: 'Your password must consist of at least 8 characters'
+                    },
+                    'verify-new-password': {
+                        required: 'Verify your password.',
+                        minlength: 'Your password must consist of at least 8 characters',
+                        equalTo: 'Please enter the same password as above'
+                    }
+                }
+            });
+        };
+
+
+        sabio.page.handlers.ajaxSuccess = function () {
+
+            console.log('ajax success');
+            toastr.options = {
+                "positionClass": "toast-top-right"
+            };
+            toastr.success('Password reset confirmed!')
+        };
+
+
+        sabio.page.handlers.ajaxFailure = function () {
+
+            console.log('ajax fail');
+            toastr.options = {
+                "positionClass": "toast-top-left"
+            };
+            toastr.error('Password is not strong enough. Please include at least one capital letter, one number & one special character')
+        };
+
+    </script>
+}
